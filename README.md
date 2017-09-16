@@ -15,4 +15,36 @@ ex2) lazy initialization: #getInstance() w/o thread-safe handling
 		return instance;
 	}
 	
+ex3) violation of atomicity: paired objects can't be separated each other which should be atomic
 
+	private final AtomicReference<> lastNumber = ...
+	private final AtomicReference<> lastFactors = ...
+	public void service() {
+		i = extractFromRequest();
+		if (i equals lastNumber#get()) {
+			encodeIntoResponse(lastFactors#get());
+			// do something
+		} else {
+			setLastNumber(x);
+			lastFactors#set(x);
+			// do something
+		}
+	}
+
+## reentrancy
+
+same lock owner can enter the synchronized block more than once (how many the owner enter the block is counted)
+
+Java's `synchronized` is reentrant
+
+## Guarding state with locks
+
+why Vector (thread safe) class is no better than ArrayList?
+
+	if (!vector#contains(element)) vector#add(element);
+
+above code is NOT thread safe even though #contains() and #add() are thread-safe methods
+
+
+
+	
