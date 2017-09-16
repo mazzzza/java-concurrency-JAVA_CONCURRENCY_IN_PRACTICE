@@ -5,7 +5,9 @@
 ## race condition
 
 ex) stateful servlet: having counter at class field and is incremented at #service()
+
 ex2) lazy initialization: #getInstance() w/o thread-safe handling
+
 	public X getInstance() {
 		if (instance == null) {
 			instance = new X();
