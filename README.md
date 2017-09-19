@@ -101,3 +101,50 @@ When to use volatile variables are:
 	pub. void init() { knownSecrets = new HashSet<Secret>();}
 
 above is a typical example of escaping by publish. Both knownSecrets and Secret are exposed to public. What is worse, adding new Secret also get revealed to public.
+
+	public ThisEscape(EventSource src) {
+		src.registerListener(
+			new EventListener() {
+				public void onEvent(Event e) { doSomething(e);}
+			});
+	}
+
+'Event e' makes 'this' reference escape since 'e' contains a hidden reference to the enclosing instance.
+Publishing an object from within its constructor is incomplete state even if the publication is the last statement in the constructor.
+
+*A common mistake that can let the 'this' reference escape during construction is to start a thread from a constructor. When an object creates a thread from its constructor, it almost always shares its 'this' reference with the new thread. There's nothing wrong with creating a thread in a constructor, but it's best not to start the thread immediately. Instead, expose a 'start' or 'initialize' method that starts the owned thread*
+
+Code below shows factory method to prevent the 'this' reference from escaping during construction.
+
+	public class SafeListener {
+		private final EventListener listener;
+		private SafeListener() {
+			listener = new EventListener() {
+				public void onEvent(Event e) { doSomething(e);}
+			}
+		};
+	}
+	// factory class
+	public static SafeListener newInstance(EventSource src) {
+		SafeListener safe = new SafeListener();
+		// now constructor is done and safe object is fully ready
+		src.registerListener(safe.listener);
+		return safe;
+	}
+
+## Thread confinement
+
+* no shared variables (use local variables within a thread)
+* use of pooled JDBC 'Connection' object
+
+### Ad-hoc thread confinement
+
+### Stack confinement
+
+* local variables in a method are thread-safe unless it escapes by appending to parameter or set as returned value
+
+### ThreadLocal
+
+* 'ThreadLocal<T>' is like 'Map<Thread, T>' each thread has its own 'T'
+
+## Immutability
