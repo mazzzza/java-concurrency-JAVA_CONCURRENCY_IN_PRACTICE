@@ -159,16 +159,18 @@ Code below shows factory method to prevent the 'this' reference from escaping du
 
 * immutable objects can sometimes provide a weak form of atomicity
 
-
+	// Immutable holder for caching a number and its factors
 	public class OneValueCache {
-		// Immutable holder for caching a number and its factors
+		:
 		private final BigInteger lastNumber;
 		private final BigInteger[] lastFactors;
+		:
 		public OneValueCache(BigInteger i, BigInteger[] factors) {
 			// 'final' makes it possible to guarantee of initialization safety
 			lastNumber = i;
 			lastFactors = Arrays.copyOf(factors, factors.length);
 		}
+		:
 		public BigInteger[] getFactors(BigInteger i) {
 			if (lastNumber == null || !lastNumber.equals(i)) return null;
 			else return Arrays.copyOf(lastFactors, lastFactors.length);
@@ -179,6 +181,7 @@ The code which makes use of above code
 
 	public class VolatileCachedFactorizer implements Servlet {
 		private volatile OneValueCache cache = new OneValueCache(null, null);
+		:
 		public void service(ServletRequest req, ServletResponse resp) {
 			BigInteger i = extractFromRequest(req);
 			BigInteger[] factors = cache.getFactors(i);
