@@ -148,3 +148,51 @@ Code below shows factory method to prevent the 'this' reference from escaping du
 * `ThreadLocal<T>` is like `Map<Thread, T>` each thread has its own `T`
 
 ## Immutability
+
+* Immutable objects are always thread-safe
+* Program state stored in immutable objects can still be updated by "replacing" immutable objects with a new instance holding new state
+* Allocation is cheaper than expected since no locking or defensive copies and reduced impact on generation GC.
+
+### Final fields
+
+### Example: Using `volatile` to publish immutable objects
+
+* immutable objects can sometimes provide a weak form of atomicity
+
+	// Immutable holder for caching a number and its factors
+	@Immutable
+	class OneValueCache {
+		private final BigInteger lastNumber;
+		private final BigInteger[] lastFactors;
+
+		public OneValueCache(BigInteger i, BigInteger[] factors) {
+			// 'final' makes it possible to guarantee of initialization safety
+			lastNumber = i;
+			lastFactors = Arrays.copyOf(factors, factors.length);
+		}
+
+		public BigInteger[] getFactors(BigInteger i) {
+			if (lastNumber == null || !lastNumber.equals(i)) return null;
+			else return Arrays.copyOf(lastFactors, lastFactors.length);
+		}
+	}
+
+
+	@ThreadSafe
+	public class VolatileCachedFactorizer implements Servlet {
+		private volatile OneValueCache cache = new OneValueCache(null, null);
+
+		public void service(ServletRequest req, ServletResponse resp) {
+			BigInteger i = extractFromRequest(req);
+			BigInteger[] factors = cache.getFactors(i);
+			if (factors ==null) {
+				factors = factor(i);
+				cache = new OneValueCache(i, factors);
+			}
+			encodeIntoResponse(resp, factors);
+		}
+	}
+
+## Safe Publication
+
+p49
