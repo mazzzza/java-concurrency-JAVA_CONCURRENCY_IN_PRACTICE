@@ -159,6 +159,8 @@ Code below shows factory method to prevent the 'this' reference from escaping du
 
 * immutable objects can sometimes provide a weak form of atomicity
 
+code snippet
+
 	// Immutable holder for caching a number and its factors
 	public class OneValueCache {
 		:
